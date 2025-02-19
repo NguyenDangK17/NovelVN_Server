@@ -32,7 +32,7 @@ export const loginUser = async (req: Request, res: Response): Promise<any> => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    res.json({ _id: user.id, username: user.username, email: user.email, token: generateToken(user.id) });
+    res.json({ _id: user.id, username: user.username, email: user.email, avatar: user.avatar, token: generateToken(user.id) });
   } catch (error) {
     res.status(500).json({ message: "Server Error", error });
   }
