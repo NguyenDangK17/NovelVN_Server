@@ -13,7 +13,13 @@ dotenv.config();
 connectDB();
 
 const app = express();
-app.use(cors());
+const corsOptions = {
+  origin: 'https://novel-vn-client.vercel.app',
+  methods: 'GET,POST,PUT,PATCH,DELETE',
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
 app.use(bodyParser.json());
 
 app.use("/api/auth", authRoutes);
