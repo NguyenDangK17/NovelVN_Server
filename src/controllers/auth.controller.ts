@@ -13,8 +13,20 @@ export const registerUser = async (req: Request, res: Response): Promise<any> =>
   try {
     const { username, email, password } = req.body;
 
-    const userExists = await User.findOne({ email });
-    if (userExists) return res.status(400).json({ message: "User already exists" });
+    const userExists = await User.findOne({
+      $or: [
+        { email: email },
+        { username: username }
+      ]
+    });
+
+    if (userExists) {
+      if (userExists.email === email) {
+        return res.status(400).json({ message: "Email already exists" });
+      } else if (userExists.username === username) {
+        return res.status(400).json({ message: "Username already taken" });
+      }
+    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = await User.create({ username, email, password: hashedPassword });
@@ -53,13 +65,8 @@ export const uploadAvatar = async (req: Request, res: Response) => {
 
     fs.unlinkSync(req.file.path);
 
-    const userId = req.body.userId;
-    if (!userId) {
-      return res.status(400).json({ message: "User ID is required" });
-    }
-
     const updatedUser = await User.findByIdAndUpdate(
-      userId,
+      req.body.user._id,
       { avatar: result.secure_url },
       { new: true }
     );

@@ -6,6 +6,26 @@ const UserSchema = new mongoose.Schema(
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     avatar: { type: String, default: "https://i.pinimg.com/736x/c4/14/27/c4142714e3d7023b30965b445bb5fb6d.jpg" },
+    role: {
+      type: String,
+      enum: [
+        'admin',
+        'moderator',
+        'user'
+      ],
+      default: 'user',
+    },
+    tag: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Tag",
+    }],
+    status: {
+      type: String, required: true, enum: [
+        'active',
+        'banned'
+      ],
+      default: 'active'
+    }
   },
   { timestamps: true }
 );

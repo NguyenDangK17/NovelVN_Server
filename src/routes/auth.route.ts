@@ -8,6 +8,6 @@ const upload = multer({ dest: "uploads/" });
 
 router.post("/register", registerUser);
 router.post("/login", loginUser);
-router.post("/upload-avatar", protect, upload.single("avatar"), uploadAvatar);
+router.post("/upload-avatar", upload.single("avatar"), protect, uploadAvatar);
 
 export default router;
