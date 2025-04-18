@@ -4,7 +4,7 @@ import cors from "cors";
 import helmet from "helmet";
 import compression from "compression";
 import morgan from "morgan";
-import rateLimit from "express-rate-limit";
+// import rateLimit from "express-rate-limit";
 import bodyParser from "body-parser";
 import connectDB from "./config/db";
 import authRoutes from "./routes/auth.route";
@@ -12,6 +12,7 @@ import novelRoutes from "./routes/novel.route";
 import mangaRoutes from "./routes/manga/manga.route";
 import volumeRoutes from "./routes/manga/volume.route";
 import historyRoutes from "./routes/history.route";
+import mangadexRoutes from "./routes/mangadex/mangadex.route";
 
 dotenv.config();
 
@@ -25,10 +26,10 @@ const corsOptions = {
   credentials: true,
 };
 // Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100
-});
+// const limiter = rateLimit({
+//   windowMs: 15 * 60 * 1000,
+//   max: 100
+// });
 
 // Middleware
 app.use(helmet());
@@ -37,7 +38,7 @@ app.use(morgan("dev"));
 app.use(cors(corsOptions));
 app.use(bodyParser.json({ limit: "10mb" }));
 app.use(bodyParser.urlencoded({ extended: true, limit: "10mb" }));
-app.use(limiter);
+// app.use(limiter);
 
 // Routes
 app.use("/api/auth", authRoutes);
@@ -45,6 +46,7 @@ app.use("/api/novels", novelRoutes);
 app.use("/api/history", historyRoutes);
 app.use("/api/mangas", mangaRoutes);
 app.use("/api/volumes", volumeRoutes);
+app.use("/api/mangadex", mangadexRoutes);
 
 // Error handling middleware
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
