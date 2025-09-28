@@ -14,15 +14,19 @@ import mangaRoutes from "./routes/manga/manga.route";
 import volumeRoutes from "./routes/manga/volume.route";
 import historyRoutes from "./routes/history.route";
 import mangadexRoutes from "./routes/mangadex/mangadex.route";
-import userRoutes from './routes/user.route';
-import http from 'http';
-import { Server as SocketIOServer } from 'socket.io';
-import jwt from 'jsonwebtoken';
+import userRoutes from "./routes/user.route";
+
+// ❌ Not needed on Vercel (serverless):
+// import http from 'http';
+// import { Server as SocketIOServer } from 'socket.io';
+// import jwt from 'jsonwebtoken';
 
 dotenv.config();
 
 const app: Express = express();
-const server = http.createServer(app);
+
+// ❌ Not needed on Vercel (no manual server creation):
+// const server = http.createServer(app);
 
 connectDB();
 
@@ -31,7 +35,7 @@ const corsOptions = {
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
   credentials: true,
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
 };
 
 // Rate limiting
@@ -59,7 +63,8 @@ app.use("/api/volumes", volumeRoutes);
 app.use("/api/mangadex", mangadexRoutes);
 app.use("/api/users", userRoutes);
 
-// Socket.io setup
+// ❌ Socket.IO section disabled for Vercel deployment
+/*
 const io = new SocketIOServer(server, {
   cors: {
     origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
@@ -76,7 +81,6 @@ io.use(async (socket, next) => {
   if (!token) return next(new Error('No token provided'));
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET || 'access-secret') as any;
-    // Attach userId to socket
     (socket as any).userId = payload.id;
     next();
   } catch (err) {
@@ -90,10 +94,8 @@ io.on('connection', (socket) => {
   socket.emit('online', { userId });
 
   socket.on('join', ({ toUserId }) => {
-    // Optionally join a room for 1-1 chat
     const room = [userId, toUserId].sort().join('-');
     socket.join(room);
-    // Send chat history
     socket.emit('chat_history', chatHistory[room] || []);
   });
 
@@ -109,15 +111,17 @@ io.on('connection', (socket) => {
     delete onlineUsers[userId];
   });
 });
+*/
 
 // Error handling middleware
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error(err.stack);
   res.status(500).json({
     status: "error",
-    message: process.env.NODE_ENV === "production"
-      ? "Internal server error"
-      : err.message
+    message:
+      process.env.NODE_ENV === "production"
+        ? "Internal server error"
+        : err.message,
   });
 });
 
@@ -125,12 +129,17 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 app.use((req: Request, res: Response) => {
   res.status(404).json({
     status: "error",
-    message: "Route not found"
+    message: "Route not found",
   });
 });
 
-// Start server
+// ❌ Removed the server.listen part — Vercel doesn't use it
+/*
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`🚀 Server running in ${process.env.NODE_ENV || "development"} mode on port ${PORT}`);
 });
+*/
+
+// ✅ Instead, export the Express app so Vercel can handle it
+module.exports = app;
