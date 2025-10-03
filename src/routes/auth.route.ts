@@ -4,13 +4,17 @@ import { loginUser, registerUser, uploadAvatar, refreshToken, logout } from "../
 import { protect } from "../middleware/authMiddleware";
 
 const router = express.Router();
-const upload = multer({ dest: "uploads/" });
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }
+});
 
 router.post("/register", registerUser);
 router.post("/login", loginUser);
 router.post("/refresh", refreshToken);
 router.post("/logout", logout);
-router.post("/upload-avatar", upload.single("avatar"), protect, uploadAvatar);
+// Protect first, then parse file; prevents unnecessary file handling
+router.post("/upload-avatar", protect, upload.single("avatar"), uploadAvatar);
 
 // Test endpoint to verify authentication
 router.get("/test", protect, (req, res) => {

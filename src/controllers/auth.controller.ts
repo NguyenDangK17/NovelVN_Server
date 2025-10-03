@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import User from "../models/user.model";
 import cloudinary from "../config/cloudinary";
-import fs from "fs";
+import stream from "stream";
 import tokenService from "../services/tokenService";
 
 // Cookie options for refresh token
@@ -172,12 +172,28 @@ export const uploadAvatar = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "No file uploaded" });
     }
 
-    const result = await cloudinary.uploader.upload(req.file.path, {
-      folder: "avatars",
-      resource_type: "image"
-    });
+    // Upload from memory buffer using upload_stream
+    const buffer = req.file.buffer;
+    if (!buffer) {
+      return res.status(400).json({ error: "File buffer is empty" });
+    }
 
-    fs.unlinkSync(req.file.path);
+    const uploadStream = (): Promise<any> => {
+      return new Promise((resolve, reject) => {
+        const cld = cloudinary.uploader.upload_stream(
+          { folder: "avatars", resource_type: "image" },
+          (error, result) => {
+            if (error) return reject(error);
+            resolve(result);
+          }
+        );
+        const pass = new stream.PassThrough();
+        pass.end(buffer);
+        pass.pipe(cld);
+      });
+    };
+
+    const result = await uploadStream();
 
     const updatedUser = await User.findByIdAndUpdate(
       req.body.user._id,
