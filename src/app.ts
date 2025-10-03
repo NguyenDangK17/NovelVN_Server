@@ -20,8 +20,20 @@ dotenv.config();
 // Initialize Express app
 const app: Express = express();
 
-// Connect database (safe for serverless; underlying driver handles reuse)
-connectDB();
+// Health check endpoint that does not require DB
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok" });
+});
+
+// Connect DB per-request to avoid crashing function at import time
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
 
 const corsOptions = {
   origin: process.env.CORS_ORIGIN || "http://localhost:3000",
