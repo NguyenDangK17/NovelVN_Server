@@ -8,5 +8,3 @@ const handler = serverless(app);
 export default async function (req: VercelRequest, res: VercelResponse) {
   return handler(req as any, res as any);
 }
-
-
