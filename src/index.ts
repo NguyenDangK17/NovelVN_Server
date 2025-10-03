@@ -134,12 +134,13 @@ app.use((req: Request, res: Response) => {
 });
 
 // ❌ Removed the server.listen part — Vercel doesn't use it
-/*
+
+// const PORT = process.env.PORT || 5000;
+// server.listen(PORT, () => {
+//   console.log(`🚀 Server running in ${process.env.NODE_ENV || "development"} mode on port ${PORT}`);
+// });
+
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
+app.listen(PORT, () => {
   console.log(`🚀 Server running in ${process.env.NODE_ENV || "development"} mode on port ${PORT}`);
 });
-*/
-
-// ✅ Instead, export the Express app so Vercel can handle it
-module.exports = app;
